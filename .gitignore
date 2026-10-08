@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+.env
+
+# Bade / generated files (har banda khud generate karega)
+Resume_csv.xls
+Resume.csv
+uploaded_dataset.csv
+resume_classifier.joblib
+metrics.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/

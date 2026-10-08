@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resume AI Studio</title>
+<meta name="description" content="A resume classifier and generator: trained on 2,481 real resumes, written with Gemini.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="nav">
+  <a class="brand" href="#/"><i class="mark"></i>Resume AI Studio</a>
+  <nav class="links" aria-label="Main">
+    <a href="#/" data-link="home">Home</a>
+    <a href="#/studio" data-link="studio">Studio</a>
+    <a href="#/galaxy" data-link="galaxy">Galaxy</a>
+    <a href="#/backend" data-link="backend">Backend</a>
+  </nav>
+  <div class="nav-end">
+    <span class="pill" id="statusPill"><i></i><b>Connecting</b></span>
+    <button class="icon-btn" id="openSettings" aria-label="Settings" title="Gemini key and model">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============================ HOME ============================ -->
+<section class="page" data-route="home">
+  <div class="hero">
+    <canvas id="heroCanvas" aria-hidden="true"></canvas>
+    <div class="hero-copy">
+      <h1>Paste a resume.<br>Watch it find its place.</h1>
+      <p class="lede">A model trained on 2,481 real resumes reads it and names the field. A second model rewrites it for that field. Both run on your own backend.</p>
+
+      <div class="demo" id="heroDemo">
+        <textarea id="heroText" rows="4" placeholder="Paste a few lines from any resume…" aria-label="Resume text"></textarea>
+        <div class="demo-row">
+          <button class="btn primary" id="heroGo">Read this resume</button>
+          <span class="samples">Or try
+            <button class="chip" data-sample="it">an IT resume</button>
+            <button class="chip" data-sample="hr">an HR resume</button>
+            <button class="chip" data-sample="chef">a chef resume</button>
+          </span>
+        </div>
+        <div class="demo-out" id="heroOut" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap band">
+    <h2 class="h2">What happens to a resume</h2>
+    <ol class="steps">
+      <li><b>Clean</b><span>Links, emails and numbers are stripped. Empty and duplicate resumes never reach the model.</span></li>
+      <li><b>Vectorize</b><span>TF-IDF turns words and word pairs into numbers. The first line, usually the job title, gets its own weight.</span></li>
+      <li><b>Classify</b><span>A linear SVM picks one of 24 fields. It was chosen over two rivals by 5-fold cross-validation.</span></li>
+      <li><b>Write</b><span>Gemini drafts the resume using only the facts you give it, guided by the keywords of the detected field.</span></li>
+    </ol>
+  </div>
+
+  <div class="wrap band numbers" id="homeNumbers"></div>
+
+  <div class="wrap band doors">
+    <a class="door" href="#/studio"><h3>Studio</h3><p>Read a resume, see why the model decided, then build a better one.</p></a>
+    <a class="door" href="#/galaxy"><h3>Galaxy</h3><p>All 24 fields in 3D, coloured by accuracy and linked where the model gets confused.</p></a>
+    <a class="door" href="#/backend"><h3>Backend</h3><p>Live requests, endpoints you can call, and the training lab.</p></a>
+  </div>
+  <footer class="wrap foot">Resume AI Studio · scikit-learn, FastAPI, Three.js, Gemini</footer>
+</section>
+
+<!-- ============================ STUDIO ============================ -->
+<section class="page wrap" data-route="studio">
+  <div class="page-head">
+    <h1 class="h1">Studio</h1>
+    <div class="tabs" role="tablist">
+      <button class="tab on" data-studio="read" role="tab">Read a resume</button>
+      <button class="tab" data-studio="build" role="tab">Build a resume</button>
+    </div>
+  </div>
+
+  <div class="studio" id="studio-read">
+    <div class="col">
+      <div class="panel">
+        <label class="drop" for="resFile"><b>Drop a PDF, DOCX or TXT</b><span>or choose a file</span><input type="file" id="resFile" accept=".pdf,.docx,.txt" hidden></label>
+        <label class="lbl" for="clsText">Resume text</label>
+        <textarea id="clsText" rows="14" placeholder="Paste the resume here. The first line should be the job title."></textarea>
+        <div class="row">
+          <button class="btn primary" id="clsBtn">Read this resume</button>
+          <button class="btn ghost" id="clsSample">Use a sample</button>
+        </div>
+        <div id="clsMsg"></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel result" id="clsResult">
+        <p class="empty">The verdict, the words behind it and the keyword coverage will appear here.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="studio hidden" id="studio-build">
+    <div class="col">
+      <div class="panel">
+        <div class="grid2">
+          <div><label class="lbl" for="gName">Full name</label><input id="gName" placeholder="Aman Sheikh"></div>
+          <div><label class="lbl" for="gRole">Target role</label><input id="gRole" placeholder="Web Developer"></div>
+          <div><label class="lbl" for="gEmail">Email</label><input id="gEmail" placeholder="you@email.com"></div>
+          <div><label class="lbl" for="gPhone">Phone</label><input id="gPhone" placeholder="+91 98765 43210"></div>
+        </div>
+        <label class="lbl" for="gLoc">Location</label><input id="gLoc" placeholder="Ahmedabad, Gujarat">
+        <label class="lbl" for="gSkills">Skills, separated by commas</label><input id="gSkills" placeholder="HTML, CSS, JavaScript, SQL, React">
+        <label class="lbl" for="gExp">Experience</label>
+        <textarea id="gExp" rows="3" placeholder="Role | Company | Period | what you did&#10;Web Developer Intern | ABC Tech | Jun–Aug 2025 | Built responsive pages. Fixed bugs"></textarea>
+        <p class="hint">One experience per line, parts separated by |. Leave empty if you are a fresher.</p>
+        <label class="lbl" for="gEdu">Education</label>
+        <textarea id="gEdu" rows="2" placeholder="Degree | Institute | Period"></textarea>
+        <label class="lbl" for="gProj">Projects</label>
+        <textarea id="gProj" rows="2" placeholder="Name | what it does, what you used"></textarea>
+        <div class="grid2">
+          <div><label class="lbl" for="gCat">Field</label><select id="gCat"><option value="">Detect automatically</option></select></div>
+          <div><label class="lbl" for="gTpl">Template</label>
+            <select id="gTpl"><option value="classic">Classic</option><option value="modern">Modern</option><option value="compact">Compact</option></select></div>
+        </div>
+        <label class="lbl" for="gExisting">Existing resume, optional</label>
+        <textarea id="gExisting" rows="3" placeholder="Paste your current resume and the AI will improve it"></textarea>
+        <div class="row"><button class="btn primary" id="genBtn">Write my resume</button></div>
+        <div id="genMsg"></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="panel slim" id="genMeta" hidden></div>
+      <div class="row actions" id="genActions" hidden>
+        <button class="btn primary" onclick="window.print()">Save as PDF</button>
+        <button class="btn ghost" id="copyBtn">Copy text</button>
+      </div>
+      <div id="resume" class="paper classic"><p class="empty dark">Your resume will be drawn here, on paper.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ GALAXY ============================ -->
+<section class="page wrap" data-route="galaxy">
+  <div class="page-head">
+    <h1 class="h1">Galaxy</h1>
+    <p class="sub">Every field the model knows. Size is how many resumes it saw. Colour is how well it recognises that field. Red threads join fields it mixes up. Drag to turn, scroll to zoom, click a field.</p>
+  </div>
+  <div class="galaxy">
+    <div class="gcanvas"><canvas id="galaxyCanvas"></canvas><div class="tip" id="galaxyTip" hidden></div>
+      <div class="legend"><span>Often wrong</span><i></i><span>Reliable</span></div></div>
+    <aside class="panel gside" id="galaxySide"><p class="empty">Click a sphere to see how the model handles that field.</p></aside>
+  </div>
+  <div class="panel heat">
+    <h3 class="h3">Where it gets confused</h3>
+    <p class="sub">Rows are the true field, columns what the model predicted. A bright diagonal means correct. Bright cells off the diagonal are mistakes.</p>
+    <div class="heatwrap"><canvas id="heatCanvas"></canvas><div class="tip" id="heatTip" hidden></div></div>
+  </div>
+  <div class="panel" id="galaxyEmpty" hidden><p class="empty">Train the model first. The galaxy is drawn from its test results.</p><a class="btn primary" href="#/backend">Go to the training lab</a></div>
+</section>
+
+<!-- ============================ BACKEND ============================ -->
+<section class="page wrap" data-route="backend">
+  <div class="page-head">
+    <h1 class="h1">Backend</h1>
+    <p class="sub">What is running behind this site, live. Click anything in the Studio and watch the path light up.</p>
+  </div>
+
+  <div class="panel arch">
+    <svg id="archSvg" viewBox="0 0 1100 350" role="img" aria-label="Request flow through the backend">
+      <defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6b7dc9"/></marker></defs>
+      <g class="paths">
+        <path id="p-ui-api"    d="M170 165 H250" />
+        <path id="p-api-clean" d="M390 150 C440 150 440 70 490 70" />
+        <path id="p-clean-tfidf" d="M630 70 H690" />
+        <path id="p-tfidf-svc"  d="M830 70 H890" />
+        <path id="p-svc-out"    d="M960 100 V185" />
+        <path id="p-svc-llm"    d="M1030 70 C1090 120 1090 285 1000 310" />
+        <path id="p-llm-out"    d="M890 310 H760" />
+        <path id="p-api-train"  d="M390 180 C440 180 440 260 490 260" />
+        <path id="p-train-model" d="M630 260 H690" />
+        <path id="p-model-svc"  d="M760 205 C760 150 830 120 900 100" class="dashed" />
+      </g>
+      <g class="nodes">
+        <g transform="translate(20 135)"><rect width="150" height="60" rx="12"/><text x="75" y="27">Browser</text><text x="75" y="45" class="s">this website</text></g>
+        <g transform="translate(250 135)"><rect width="140" height="60" rx="12" class="core"/><text x="70" y="27">FastAPI</text><text x="70" y="45" class="s">app.py</text></g>
+        <g transform="translate(490 40)"><rect width="140" height="60" rx="12"/><text x="70" y="27">Cleaner</text><text x="70" y="45" class="s">regex, lowercase</text></g>
+        <g transform="translate(690 40)"><rect width="140" height="60" rx="12"/><text x="70" y="27">TF-IDF</text><text x="70" y="45" class="s">words + pairs</text></g>
+        <g transform="translate(890 40)"><rect width="140" height="60" rx="12" class="core"/><text x="70" y="27">LinearSVC</text><text x="70" y="45" class="s">24 fields</text></g>
+        <g transform="translate(890 185)"><rect width="140" height="60" rx="12"/><text x="70" y="27">Result</text><text x="70" y="45" class="s">JSON to browser</text></g>
+        <g transform="translate(760 280)"><rect width="240" height="60" rx="12"/><text x="120" y="27">Gemini</text><text x="120" y="45" class="s">writes the resume</text></g>
+        <g transform="translate(490 230)"><rect width="140" height="60" rx="12"/><text x="70" y="27">Training lab</text><text x="70" y="45" class="s">split, CV, fit</text></g>
+        <g transform="translate(690 205)"><rect width="140" height="54" rx="12"/><text x="70" y="25">model.joblib</text><text x="70" y="42" class="s">saved on disk</text></g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="two">
+    <div class="panel">
+      <div class="panel-head"><h3 class="h3">Live requests</h3><span class="pill sm" id="logPill"><i></i><b>Listening</b></span></div>
+      <div class="logbox" id="logBox"><p class="empty">No requests yet. Use the Studio and they will show up here.</p></div>
+    </div>
+    <div class="panel">
+      <h3 class="h3">System</h3>
+      <dl class="kv" id="sysInfo"></dl>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3 class="h3">Try the API</h3>
+    <div class="explorer">
+      <ul class="eplist" id="epList"></ul>
+      <div class="epbody">
+        <div class="epline"><code id="epTitle">Pick an endpoint</code><button class="btn primary sm" id="epRun" disabled>Send</button></div>
+        <label class="lbl" for="epReq">Request body</label>
+        <textarea id="epReq" class="mono" rows="7" spellcheck="false"></textarea>
+        <label class="lbl">Response <span id="epMeta" class="meta"></span></label>
+        <pre id="epRes" class="mono out">Nothing sent yet.</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel lab">
+    <div class="panel-head"><h3 class="h3">Training lab</h3>
+      <div class="row"><label class="btn ghost sm" style="cursor:pointer">Choose CSV<input type="file" id="csvFile" accept=".csv,.xls" hidden></label>
+      <button class="btn primary sm" id="trainBtn">Train model</button></div></div>
+    <p class="hint" id="dsInfo"></p>
+    <ol class="stepper" id="stepper">
+      <li data-k="Dataset">Load</li><li data-k="Split">Split</li><li data-k="[LinearSVC]">LinearSVC</li><li data-k="[LogReg]">LogReg</li><li data-k="[CompNB]">CompNB</li><li data-k="Model save">Save</li>
+    </ol>
+    <pre class="mono out log" id="trainLog">The training log appears here.</pre>
+  </div>
+</section>
+
+</main>
+
+<dialog id="settings">
+  <form method="dialog" class="dlg">
+    <h3 class="h3">Gemini settings</h3>
+    <p class="hint">Without a key the builder falls back to a plain template. Get a free key at aistudio.google.com/apikey. It is kept only in this browser tab.</p>
+    <label class="lbl" for="apiKey">API key</label><input id="apiKey" type="password" autocomplete="off" placeholder="Paste key">
+    <label class="lbl" for="modelName">Model, optional</label><input id="modelName" placeholder="gemini-3.5-flash">
+    <div id="testOut"></div>
+    <div class="row end">
+      <button type="button" class="btn ghost" id="testKey">Test key</button>
+      <button type="button" class="btn primary" id="saveKey">Save</button>
+      <button class="btn ghost" value="close">Close</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="/static/vendor/three.min.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
