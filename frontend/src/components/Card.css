@@ -1,0 +1,29 @@
+/* Card component */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-base), transform var(--transition-base), border-color var(--transition-base);
+}
+
+.card-hover:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+}
+
+.card-bordered {
+  border: 1px solid var(--border);
+}
+
+.card-glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+[data-theme='dark'] .card-glass {
+  background: rgba(18, 26, 46, 0.72);
+  border-color: rgba(148, 163, 184, 0.16);
+}

@@ -1,0 +1,72 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# ML Models
+backend/models/trained/*.pkl
+backend/models/trained/*.joblib
+backend/models/metadata/*.json
+
+# Local resume datasets
+/Resume.csv
+/Resume.zip
+/backend/data/Resume.csv
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Frontend build
+frontend/dist/
+frontend/build/
+frontend/.vite/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Uploaded files
+uploads/
+temp/
+
+# PDFs generated
+*.pdf
+
+# Keep structure
+!backend/models/trained/.gitkeep
+!backend/models/metadata/.gitkeep

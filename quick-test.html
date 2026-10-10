@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick Login Test</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 50px auto; padding: 20px; }
+        button { padding: 15px 30px; font-size: 16px; background: #4F46E5; color: white; border: none; border-radius: 8px; cursor: pointer; margin: 10px 5px; }
+        button:hover { background: #4338CA; }
+        #result { margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px; }
+        .success { background: #d1fae5; color: #065f46; }
+        .error { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <h1>?? Quick Login Test</h1>
+    <p>Backend: <strong>http://localhost:8000</strong></p>
+    
+    <button onclick="testLogin()">Test Demo Login</button>
+    <button onclick="testRegister()">Test New Registration</button>
+    <button onclick="checkCORS()">Check CORS</button>
+    
+    <div id="result"></div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+
+        function show(msg, success = true) {
+            const div = document.getElementById('result');
+            div.innerHTML = '<pre>' + JSON.stringify(msg, null, 2) + '</pre>';
+            div.className = success ? 'success' : 'error';
+        }
+
+        async function checkCORS() {
+            try {
+                const response = await fetch(${API_URL}/api/health, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                show({ status: 'CORS OK', health: data });
+            } catch (err) {
+                show({ error: 'CORS Failed', message: err.message }, false);
+            }
+        }
+
+        async function testLogin() {
+            try {
+                const response = await fetch(${API_URL}/api/auth/login, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'demo@example.com',
+                        password: 'demo123'
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    show({ error: 'Login failed', details: error }, false);
+                    return;
+                }
+                
+                const data = await response.json();
+                show({ 
+                    status: 'Login SUCCESS!',
+                    token_preview: data.access_token.substring(0, 50) + '...'
+                });
+            } catch (err) {
+                show({ error: 'Request failed', message: err.message }, false);
+            }
+        }
+
+        async function testRegister() {
+            const randomEmail = 'user' + Date.now() + '@test.com';
+            try {
+                const response = await fetch(${API_URL}/api/auth/register, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: 'Test User',
+                        email: randomEmail,
+                        password: 'Test123!@#'
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    show({ error: 'Registration failed', details: error }, false);
+                    return;
+                }
+                
+                const data = await response.json();
+                show({ 
+                    status: 'Registration SUCCESS!',
+                    email: randomEmail,
+                    token_preview: data.access_token.substring(0, 50) + '...'
+                });
+            } catch (err) {
+                show({ error: 'Request failed', message: err.message }, false);
+            }
+        }
+
+        // Auto-check CORS on load
+        window.onload = () => checkCORS();
+    </script>
+</body>
+</html>
